@@ -17,10 +17,9 @@ install_if_missing("gensim")
 install_if_missing("matplotlib")
 install_if_missing("seaborn")
 install_if_missing("wordcloud")
-install_if_missing("rapidfuzz")
 install_if_missing("scikit-learn")
 
-# Jetzt können alle Module importiert werden
+# 📚 Importieren der Bibliotheken
 import pandas as pd
 import numpy as np
 import re
@@ -30,7 +29,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 from wordcloud import WordCloud
-from rapidfuzz import fuzz
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
@@ -46,16 +44,16 @@ nltk.download('punkt')
 nltk.download('wordnet')
 nltk.download('vader_lexicon')
 
+# 📥 Daten laden
 print("📥 Lade Daten...")
-df = pd.read_csv("/Users/sarahmannes/Downloads/NLP Analyse/311_Service_Requests.csv", 
-                 usecols=["Complaint Type", "Descriptor", "Location Type", "Incident Zip", "City", 
-                          "Borough", "Resolution Description"])
-df = df.dropna(subset=["Complaint Type", "Resolution Description"])  # Entferne fehlende Werte
+df = pd.read_csv("/Users/sarahmannes/Downloads/NLP Analyse/Reviews.csv", usecols=["Text"])
+df = df.dropna(subset=["Text"])  # Entferne fehlende Werte
 
+# 🛠 Textvorbereitung
 print("🛠 Bereinige Texte...")
 lemmatizer = WordNetLemmatizer()
 stop_words = set(stopwords.words('english'))
-custom_stopwords = {"complaint", "department", "police", "request", "issue", "service", "provided"}
+custom_stopwords = {"br", "product", "amazon", "buy", "purchase", "order", "get"}
 stop_words.update(custom_stopwords)
 
 def preprocess_text(text):
@@ -66,11 +64,12 @@ def preprocess_text(text):
     tokens = [lemmatizer.lemmatize(word) for word in tokens if word not in stop_words]
     return " ".join(tokens)
 
-df["clean_text"] = df["Resolution Description"].astype(str).apply(preprocess_text)
+df["clean_text"] = df["Text"].astype(str).apply(preprocess_text)
 
-df["clean_text"].to_csv("bereinigte_beschwerden.txt", index=False, header=False)
-print("✅ Datei 'bereinigte_beschwerden.txt' wurde erfolgreich gespeichert!")
+df["clean_text"].to_csv("bereinigte_rezensionen.txt", index=False, header=False)
+print("✅ Datei 'bereinigte_rezensionen.txt' wurde erfolgreich gespeichert!")
 
+# 📊 Vektorisierung (BoW & TF-IDF)
 print("📊 Wandle Texte in numerische Vektoren um...")
 vectorizer_bow = CountVectorizer(max_features=1000, ngram_range=(1,2), max_df=0.95, min_df=5)
 bow_matrix = vectorizer_bow.fit_transform(df["clean_text"])
@@ -83,6 +82,7 @@ with open("vektorisierung.txt", "w", encoding="utf-8") as file:
     file.write(f"TF-IDF Shape: {tfidf_matrix.shape}\n")
 print("✅ Datei 'vektorisierung.txt' wurde erfolgreich gespeichert!")
 
+# 📑 Themenextraktion (LDA & NMF)
 print("📑 Extrahiere Themen mit LDA & NMF...")
 lda_model = LatentDirichletAllocation(n_components=5, max_iter=10, learning_method="online", random_state=42)
 lda_model.fit(bow_matrix)
@@ -90,27 +90,22 @@ lda_model.fit(bow_matrix)
 nmf_model = NMF(n_components=5, max_iter=200, random_state=42)
 nmf_model.fit(tfidf_matrix)
 
+# 📝 Themenbenennung verbessern
 print("📝 Bestimme Themennamen...")
 predefined_topics = {
-    "Traffic & Infrastructure": {"road", "street", "traffic", "parking", "sign", "bridge", "construction"},
-    "Noise & Environment": {"noise", "garbage", "pollution", "waste", "recycling", "odor", "air"},
-    "Safety & Crime": {"crime", "police", "theft", "vandalism", "assault", "robbery"},
-    "Public Services": {"water", "electricity", "heating", "public", "transport", "service"},
-    "Social Issues": {"homeless", "shelter", "drug", "abuse", "support", "mental", "health"}
+    "Taste & Quality": {"flavor", "taste", "delicious", "good", "bad", "sweet", "bitter", "fresh"},
+    "Product Ingredients": {"organic", "sugar", "protein", "fat", "carbs", "gluten", "preservative"},
+    "Packaging & Delivery": {"box", "bag", "packaging", "sealed", "damaged", "fresh"},
+    "Customer Service": {"refund", "return", "support", "contact", "replacement", "problem"},
+    "Price & Value": {"cheap", "expensive", "value", "deal", "price", "worth"},
+    "Pet Products": {"dog", "cat", "treat", "pet", "chew", "toy", "bone", "feed"}
+
 }
 
 def name_topic(topic_words):
-    best_match = "Miscellaneous Issues"
-    best_score = 0
-    topic_words_str = ", ".join(topic_words)
-
-    for topic_name, keywords in predefined_topics.items():
-        keywords_str = ", ".join(keywords)
-        score = fuzz.partial_ratio(topic_words_str, keywords_str)
-        if score > best_score:
-            best_match = topic_name
-            best_score = score
-    return best_match
+    topic_scores = {topic: len(set(topic_words) & keywords) for topic, keywords in predefined_topics.items()}
+    best_topic = max(topic_scores, key=topic_scores.get)
+    return best_topic if topic_scores[best_topic] > 1 else "Miscellaneous"
 
 def save_named_topics(model, feature_names, filename, n_words=10):
     with open(filename, "w", encoding="utf-8") as file:
@@ -123,6 +118,7 @@ def save_named_topics(model, feature_names, filename, n_words=10):
 save_named_topics(lda_model, vectorizer_bow.get_feature_names_out(), "lda_themen.txt")
 save_named_topics(nmf_model, vectorizer_tfidf.get_feature_names_out(), "nmf_themen.txt")
 
+# 📊 Coherence Score berechnen
 print("📊 Berechne Coherence Score...")
 texts = [text.split() for text in df["clean_text"]]
 dictionary = Dictionary(texts)
@@ -136,16 +132,21 @@ with open("coherence_score.txt", "w", encoding="utf-8") as file:
     file.write(coherence_score)
 print("✅ Datei 'coherence_score.txt' wurde erfolgreich gespeichert!")
 
+# 📊 LDA-Visualisierung mit Themenbezeichnungen
 print("📊 Erstelle LDA-Visualisierung...")
+topic_labels = [name_topic([vectorizer_bow.get_feature_names_out()[i] for i in topic.argsort()[:-10 - 1:-1]]) for topic in lda_model.components_]
+
 plt.figure(figsize=(10, 5))
-sns.barplot(x=[f'Thema {i+1}' for i in range(5)], y=lda_model.components_.sum(axis=1))
+sns.barplot(x=topic_labels, y=lda_model.components_.sum(axis=1))
 plt.title("Anzahl der Wörter pro Thema (LDA)")
 plt.xlabel("Thema")
 plt.ylabel("Wort-Häufigkeit")
+plt.xticks(rotation=30, ha='right')
 plt.savefig("lda_visualisierung.png")
 plt.show()
 print("✅ Datei 'lda_visualisierung.png' wurde erfolgreich gespeichert!")
 
+# 📊 Sentiment-Analyse
 print("📊 Erstelle Sentiment-Verteilung...")
 sia = SentimentIntensityAnalyzer()
 df["sentiment"] = df["clean_text"].apply(lambda x: sia.polarity_scores(x)['compound'])
@@ -155,9 +156,9 @@ print("✅ Datei 'sentiment_analyse.txt' wurde erfolgreich gespeichert!")
 
 plt.figure(figsize=(8,5))
 sns.histplot(df["sentiment"], bins=30, kde=True)
-plt.title("Sentiment-Verteilung der Beschwerden")
+plt.title("Sentiment-Verteilung der Rezensionen")
 plt.xlabel("Sentiment-Score")
-plt.ylabel("Anzahl der Beschwerden")
+plt.ylabel("Anzahl der Bewertungen")
 plt.savefig("sentiment_verteilung.png")
 plt.show()
 print("✅ Datei 'sentiment_verteilung.png' wurde erfolgreich gespeichert!")
