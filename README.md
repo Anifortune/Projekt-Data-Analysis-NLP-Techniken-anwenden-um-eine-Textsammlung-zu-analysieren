@@ -1,5 +1,3 @@
-# Projekt-Data-Analysis-NLP-Techniken-anwenden-um-eine-Textsammlung-zu-analysieren
-
 ### 📜 **README.md**  
 
 ```md
@@ -99,6 +97,8 @@ Dieses Projekt steht unter der **MIT-Lizenz**, die es erlaubt, den Code frei zu 
 ✅ **Vektorisierung mit BoW & TF-IDF**  
 ✅ **Sentiment-Analyse & Coherence Score**  
 ✅ **Visualisierungen & Ergebnisexport**  
+❌ **Korrekte Themenbenennung der LDA Visualisierung**
+
 
 📌 **Mögliche Erweiterungen:**  
 - 🔍 **Clustering** von Beschwerden basierend auf Themen.  
@@ -107,7 +107,7 @@ Dieses Projekt steht unter der **MIT-Lizenz**, die es erlaubt, den Code frei zu 
 
 ---
 
-🚀 **Projektstatus: Fertig & bereit zur Analyse!**  
+🚀 **Projektstatus: Bereit zur Abgabe Phase 2**  
 📩 **Feedback & Erweiterungsideen willkommen!**  
 ```
 
