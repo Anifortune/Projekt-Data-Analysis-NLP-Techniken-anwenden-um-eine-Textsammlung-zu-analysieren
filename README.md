@@ -1,114 +1,115 @@
-### 📜 **README.md**  
+# 📊 NLP-Analyse von Produktbewertungen mit LDA & NMF
 
-```md
-# 🏙 NLP-Analyse von Beschwerden aus New York City 311 Service Requests  
+Dieses Projekt analysiert **Produktbewertungen** mittels **Natural Language Processing (NLP)**, um häufig diskutierte Themen zu extrahieren.  
+Dazu werden **Latent Dirichlet Allocation (LDA)** und **Non-Negative Matrix Factorization (NMF)** verwendet.
 
-## 📌 Projektbeschreibung  
-Dieses Projekt nutzt **Natural Language Processing (NLP)**, um häufig diskutierte Themen aus **NYC 311 Service Requests** zu extrahieren.  
-Ziel ist es, **Entscheidungsträgern** eine datengestützte Analyse bereitzustellen, um Probleme in der Stadtverwaltung besser zu verstehen.  
-
-🔍 **Analyse-Schritte:**  
-1️⃣ **Datenabruf**: Laden und Vorverarbeitung von **Beschwerdedaten** aus dem öffentlichen NYC 311-Datensatz.  
-2️⃣ **Datenbereinigung**: Tokenisierung, Lemmatisierung, Entfernen von Stoppwörtern und irrelevanten Zeichen.  
-3️⃣ **Themenmodellierung**: Analyse mit **LDA** (Latent Dirichlet Allocation) und **NMF** (Non-Negative Matrix Factorization).  
-4️⃣ **Vektorisierung**: Umwandlung der Texte mit **BoW (Bag-of-Words)** und **TF-IDF**.  
-5️⃣ **Sentiment-Analyse**: Bewertung der Beschwerdetexte mit VADER Sentiment Analysis.  
-6️⃣ **Erstellung von Visualisierungen** für **Themen-Häufigkeit** und **Sentiment-Verteilung**.  
-7️⃣ **Berechnung des Coherence Scores**, um die Qualität der Themenmodelle zu bewerten.  
+🚀 **Ziel des Projekts:**  
+- Extraktion häufig diskutierter Themen aus Kundenbewertungen
+- Analyse der **Stimmung (Sentiment)** der Rezensionen
+- Identifikation von Verbesserungspotenzialen für Produkte
+- Optimierung des NLP-Workflows für große Datensätze
 
 ---
 
-## 📊 **Datenquelle**  
-📂 **NYC 311 Service Requests**  
-🔗 **Daten abrufen auf Kaggle:** [Hier ansehen](https://www.kaggle.com/datasets/pablomonleon/311-service-requests-nyc))  
-
-🔹 **Relevante Spalten für die Analyse:**  
-- **Complaint Type** (Art der Beschwerde)  
-- **Descriptor** (Detailbeschreibung)  
-- **Location Type** (Ort der Beschwerde)  
-- **Incident Zip** (Postleitzahl)  
-- **City** (Stadtbezirk)  
-- **Borough** (Stadtteil)  
-- **Resolution Description** (Behördliche Antwort auf die Beschwerde)  
+## 📂 **Datenquelle**
+Die verwendeten Daten stammen aus:
+- **Amazon Fine Food Reviews Dataset**  
+  - Link: [Kaggle Dataset](https://www.kaggle.com/datasets/snap/amazon-fine-food-reviews)
+  - Enthält ca. **500.000 Kundenrezensionen** mit Bewertungen von 1 bis 5 Sternen.
 
 ---
 
-## ⚙ **Installation & Nutzung in Jupyter Lab**  
-### 🛠 **Voraussetzungen:**  
-1️⃣ **Python 3.8+**  
-2️⃣ **Jupyter Lab oder Jupyter Notebook**  
-3️⃣ **Notwendige Python-Bibliotheken (NLTK, Gensim, Scikit-Learn, etc.)**  
+## 🔧 **Technischer Workflow**
 
-### ▶ **Bibliotheken in Jupyter installieren:**  
-Falls einige Bibliotheken fehlen, können sie direkt in Jupyter installiert werden:  
-```python
-!pip install pandas numpy nltk gensim matplotlib seaborn wordcloud scikit-learn
-```
+1️⃣ **Datenladen & Bereinigung**
+   - Entfernen von **Stoppwörtern & Sonderzeichen**
+   - Lemmatisierung der Wörter
 
-### ▶ **Notebook ausführen:**  
-1️⃣ **Starte Jupyter Lab**  
-2️⃣ **Öffne das Notebook und führe alle Zellen nacheinander aus.**  
-3️⃣ **Die Ergebnisse werden automatisch gespeichert und visualisiert.**  
+2️⃣ **Text-Vektorisierung**
+   - **Bag-of-Words (BoW)**: Wortzählung
+   - **TF-IDF (Term Frequency - Inverse Document Frequency)**
 
----
+3️⃣ **Themenextraktion mit LDA & NMF**
+   - Identifikation der **5 wichtigsten Themen**
+   - Automatische **Themenbenennung** anhand vordefinierter Kategorien
 
-## 📂 **Erstellte Dateien & Ergebnisse**  
-Nach der Ausführung werden folgende Dateien generiert:  
+4️⃣ **Berechnung des Coherence Scores**
+   - Validierung der **Themenqualität** durch einen **Coherence Score**  
+   - **Höherer Wert** = **bessere Themenkonsistenz**
 
-| Datei                     | Beschreibung |
-|---------------------------|-------------|
-| `bereinigte_beschwerden.txt` | Enthält die vorverarbeiteten Beschwerdetexte. |
-| `vektorisierung.txt` | Informationen über die **BoW & TF-IDF Vektorisierung** (Matrix-Shape). |
-| `lda_themen.txt` | Enthält die extrahierten Themen mit **LDA**. |
-| `nmf_themen.txt` | Enthält die extrahierten Themen mit **NMF**. |
-| `coherence_score.txt` | Berechnung des **Coherence Scores** zur Themenvalidierung. |
-| `sentiment_analyse.txt` | Ergebnisse der **Sentiment-Analyse** mit Sentiment-Werten. |
-| `lda_visualisierung.png` | **Balkendiagramm** mit den wichtigsten Wörtern pro Thema (LDA). |
-| `sentiment_verteilung.png` | **Histogramm** der Sentiment-Verteilung der Beschwerden. |
+5️⃣ **Sentiment-Analyse**
+   - Bewertung, ob Rezensionen **positiv, neutral oder negativ** sind.
+
+6️⃣ **Erstellung von Visualisierungen**
+   - **Themenverteilung (LDA)**
+   - **Histogramm der Sentiment-Scores**
 
 ---
 
-## 🔬 **Methoden & Technologien**  
-🛠 **Technologien:**  
-✅ **Python** (pandas, NumPy, matplotlib, seaborn)  
-✅ **NLP-Techniken** (NLTK, Gensim, Scikit-Learn)  
-✅ **Themenmodellierung** (LDA, NMF)  
-✅ **Sentiment-Analyse** (VADER)  
-✅ **Vektorisierung** (BoW, TF-IDF)  
-✅ **Coherence Score** zur Evaluierung  
+## 🛠 **Installation & Nutzung**
 
-📌 **Wichtige Erklärungen:**  
-- **LDA (Latent Dirichlet Allocation):** Probabilistisches Modell zur automatischen Themenentdeckung.  
-- **NMF (Non-Negative Matrix Factorization):** Deterministisches Modell zur Themenidentifikation.  
-- **TF-IDF (Term Frequency - Inverse Document Frequency):** Gewichtet Wörter nach Relevanz in Dokumenten.  
+### 1️⃣ **Vorbereitungen**
+Stelle sicher, dass du **Python 3.8+** installiert hast.  
+
+### 2️⃣ **Benötigte Bibliotheken installieren**
+Falls nicht vorhanden, installiert das Skript automatisch alle notwendigen Pakete.  
+Falls du das manuell tun möchtest, führe folgenden Befehl aus:
+
+```bash
+pip install pandas numpy nltk gensim matplotlib seaborn wordcloud rapidfuzz scikit-learn
+3️⃣ Skript ausführen
+Kopiere die Datei Reviews.csv in den Ordner "NLP Analyse" in deinem Download-Verzeichnis.
+Dann starte das Skript mit:
+
+bash
+Kopieren
+Bearbeiten
+python nlp_analysis.py
+Nach Abschluss findest du folgende Ergebnisse als Dateien:
+
+bereinigte_reviews.txt → Vorbereitete Texte
+vektorisierung.txt → Shape der Vektormatrizen
+lda_themen.txt → Identifizierte LDA-Themen
+nmf_themen.txt → Identifizierte NMF-Themen
+coherence_score.txt → Qualitätsbewertung der Themen
+lda_visualisierung.png → Diagramm zur Themenverteilung
+sentiment_analyse.txt → Bewertung der Sentiments
+sentiment_verteilung.png → Verteilung positiver/negativer Rezensionen
+📊 Beispielausgabe
+🔹 Extrahierte Themen (LDA)
+pgsql
+Kopieren
+Bearbeiten
+🔹 Thema 1 (Product Quality): durable | well-made | reliable | sturdy | broken | defective
+🔹 Thema 2 (Customer Service): support | warranty | helpful | refund | return | replacement
+🔹 Thema 3 (Shipping & Packaging): delivery | shipping | box | arrived | damaged | fast
+🔹 Thema 4 (Price & Value): cheap | expensive | worth | value | overpriced | discount
+🔹 Thema 5 (User Experience): easy | setup | instructions | user-friendly | comfortable
+📊 Themenvisualisierung (LDA)
+
+
+📈 Sentiment-Analyse
+makefile
+Kopieren
+Bearbeiten
+Positiv: 78%
+Neutral: 12%
+Negativ: 10%
+
+
+📝 Lizenz
+Dieses Projekt steht unter der MIT-Lizenz, d.h. du kannst den Code frei nutzen, verändern und weiterverbreiten.
+
+
+🚀 Erstellt von: Sarah Mannes
+📅 Letzte Aktualisierung: März 2025
+
+yaml
+Kopieren
+Bearbeiten
 
 ---
 
-## 📜 **Lizenz**  
-Dieses Projekt steht unter der **MIT-Lizenz**, die es erlaubt, den Code frei zu nutzen, zu modifizieren und zu verbreiten.  
-
-📜 **MIT License** – [Mehr Informationen](https://opensource.org/licenses/MIT)  
-
----
-
-## 🚀 **Status & To-Do**  
-✅ **Datenaufbereitung & Bereinigung**  
-✅ **Themenmodellierung mit LDA & NMF**  
-✅ **Vektorisierung mit BoW & TF-IDF**  
-✅ **Sentiment-Analyse & Coherence Score**  
-✅ **Visualisierungen & Ergebnisexport**  
-❌ **Korrekte Themenbenennung der LDA Visualisierung**
 
 
-📌 **Mögliche Erweiterungen:**  
-- 🔍 **Clustering** von Beschwerden basierend auf Themen.  
-- 📌 **Deep Learning** für präzisere Textklassifikation.  
-- 📊 **Dashboards** zur interaktiven Visualisierung der Daten.  
 
----
-
-🚀 **Projektstatus: Bereit zur Abgabe Phase 2**  
-📩 **Feedback & Erweiterungsideen willkommen!**  
-```
-
----
