@@ -20,7 +20,7 @@ Ziel ist es, **Entscheidungsträgern** eine datengestützte Analyse bereitzustel
 
 ## 📊 **Datenquelle**  
 📂 **NYC 311 Service Requests**  
-🔗 **Daten abrufen auf Kaggle:** [Hier ansehen](https://www.kaggle.com/datasets/pablomonleon/311-service-requests-nyc)  
+🔗 **Daten abrufen auf Kaggle:** [Hier ansehen](https://www.kaggle.com/datasets/pablomonleon/311-service-requests-nyc))  
 
 🔹 **Relevante Spalten für die Analyse:**  
 - **Complaint Type** (Art der Beschwerde)  
