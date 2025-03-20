@@ -1,0 +1,1 @@
+Coherence Score für LDA: 0.3374
