@@ -52,7 +52,7 @@ Ziel ist es, aus einer großen Menge unstrukturierter Texte (Produktrezensionen 
 
 | Datei                         | Beschreibung                                         |
 |------------------------------|------------------------------------------------------|
-| `bereinigte_beschwerden.txt` | Vorverarbeitete Rezensionstexte                      |
+| `bereinigte_reviews.txt` | Vorverarbeitete Rezensionstexte                      |
 | `vektorisierung.txt`         | Matrixgrößen von BoW und TF-IDF                      |
 | `lda_themen.txt`             | Extrahierte Themen mit LDA + automatische Benennung  |
 | `nmf_themen.txt`             | Extrahierte Themen mit NMF + automatische Benennung  |
