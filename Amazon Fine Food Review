@@ -61,8 +61,8 @@ def preprocess_text(text):
     return " ".join(tokens)
 
 df["clean_text"] = df["Text"].astype(str).apply(preprocess_text)
-df["clean_text"].to_csv("bereinigte_beschwerden.txt", index=False, header=False)
-print("✅ Datei 'bereinigte_beschwerden.txt' wurde erfolgreich gespeichert!")
+df["clean_text"].to_csv("bereinigte_reviews.txt", index=False, header=False)
+print("✅ Datei 'bereinigte_reviews.txt' wurde erfolgreich gespeichert!")
 
 # 📊 Vektorisierung
 print("📊 Wandle Texte in numerische Vektoren um...")
