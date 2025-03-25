@@ -1,4 +1,4 @@
-# 🧠 NLP-Projekt zur Themen- und Sentimentanalyse von Produktrezensionen
+# NLP-Projekt zur Themen- und Sentimentanalyse von Produktrezensionen
 
 Dieses Projekt analysiert unstrukturierte Produktbewertungen (aus dem Lebensmittelbereich) mithilfe moderner NLP-Methoden. Ziel ist es, häufige Themen automatisch zu extrahieren, die Qualität der Themenmodellierung zu bewerten und die Stimmung der Rezensionen zu klassifizieren.
 
@@ -52,7 +52,7 @@ Ziel ist es, aus einer großen Menge unstrukturierter Texte (Produktrezensionen 
 
 | Datei                         | Beschreibung                                         |
 |------------------------------|------------------------------------------------------|
-| `bereinigte_beschwerden.txt` | Vorverarbeitete Rezensionstexte                      |
+| `bereinigte_reviews.txt` | Vorverarbeitete Rezensionstexte                      |
 | `vektorisierung.txt`         | Matrixgrößen von BoW und TF-IDF                      |
 | `lda_themen.txt`             | Extrahierte Themen mit LDA + automatische Benennung  |
 | `nmf_themen.txt`             | Extrahierte Themen mit NMF + automatische Benennung  |
