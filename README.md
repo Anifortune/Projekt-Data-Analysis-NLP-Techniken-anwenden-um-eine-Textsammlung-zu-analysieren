@@ -1,115 +1,96 @@
-# 📊 NLP-Analyse von Produktbewertungen mit LDA & NMF
+# 🧠 NLP-Projekt zur Themen- und Sentimentanalyse von Produktrezensionen
 
-Dieses Projekt analysiert **Produktbewertungen** mittels **Natural Language Processing (NLP)**, um häufig diskutierte Themen zu extrahieren.  
-Dazu werden **Latent Dirichlet Allocation (LDA)** und **Non-Negative Matrix Factorization (NMF)** verwendet.
-
-🚀 **Ziel des Projekts:**  
-- Extraktion häufig diskutierter Themen aus Kundenbewertungen
-- Analyse der **Stimmung (Sentiment)** der Rezensionen
-- Identifikation von Verbesserungspotenzialen für Produkte
-- Optimierung des NLP-Workflows für große Datensätze
+Dieses Projekt analysiert unstrukturierte Produktbewertungen (aus dem Lebensmittelbereich) mithilfe moderner NLP-Methoden. Ziel ist es, häufige Themen automatisch zu extrahieren, die Qualität der Themenmodellierung zu bewerten und die Stimmung der Rezensionen zu klassifizieren.
 
 ---
 
-## 📂 **Datenquelle**
-Die verwendeten Daten stammen aus:
-- **Amazon Fine Food Reviews Dataset**  
-  - Link: [Kaggle Dataset](https://www.kaggle.com/datasets/snap/amazon-fine-food-reviews)
-  - Enthält ca. **500.000 Kundenrezensionen** mit Bewertungen von 1 bis 5 Sternen.
+## 📌 Zielsetzung
+
+Ziel ist es, aus einer großen Menge unstrukturierter Texte (Produktrezensionen von Amazon) **automatisch Themen** zu identifizieren und **Stimmungen zu analysieren**, um daraus **relevante Erkenntnisse** für Unternehmen oder Entscheidungsträger zu gewinnen.
 
 ---
 
-## 🔧 **Technischer Workflow**
+## 🔍 Analyse-Workflow
 
-1️⃣ **Datenladen & Bereinigung**
-   - Entfernen von **Stoppwörtern & Sonderzeichen**
-   - Lemmatisierung der Wörter
+### 1️⃣ **Datenquelle**
+- **Datei**: [`Reviews.csv`](https://www.kaggle.com/datasets/snap/amazon-fine-food-reviews)
+- **Inhalt**: Kundenrezensionen inkl. Text, Bewertung, Produktinformationen
+- **Importpfad**: `/Users/sarahmannes/Downloads/NLP Analyse/Reviews.csv`
 
-2️⃣ **Text-Vektorisierung**
-   - **Bag-of-Words (BoW)**: Wortzählung
-   - **TF-IDF (Term Frequency - Inverse Document Frequency)**
+### 2️⃣ **Vorverarbeitung**
+- Entfernen von Sonderzeichen, Zahlen, HTML-Tags (`<br>`), häufige Stoppwörter und irrelevante Begriffe
+- Tokenisierung & Lemmatisierung
+- Speicherung als `bereinigte_beschwerden.txt`
 
-3️⃣ **Themenextraktion mit LDA & NMF**
-   - Identifikation der **5 wichtigsten Themen**
-   - Automatische **Themenbenennung** anhand vordefinierter Kategorien
+### 3️⃣ **Vektorisierung**
+- Bag-of-Words (BoW)
+- TF-IDF
+- Ausgabe der Dimensionen in `vektorisierung.txt`
 
-4️⃣ **Berechnung des Coherence Scores**
-   - Validierung der **Themenqualität** durch einen **Coherence Score**  
-   - **Höherer Wert** = **bessere Themenkonsistenz**
+### 4️⃣ **Themenmodellierung**
+- **LDA** (Latent Dirichlet Allocation) auf BoW
+- **NMF** (Non-negative Matrix Factorization) auf TF-IDF
+- Automatische **Themenbenennung** per Fuzzy Matching
+- Speicherung in `lda_themen.txt` & `nmf_themen.txt`
 
-5️⃣ **Sentiment-Analyse**
-   - Bewertung, ob Rezensionen **positiv, neutral oder negativ** sind.
+### 5️⃣ **Coherence Score**
+- Berechnung mit `gensim`
+- Ausgabe in `coherence_score.txt` zur Bewertung der Modellqualität
 
-6️⃣ **Erstellung von Visualisierungen**
-   - **Themenverteilung (LDA)**
-   - **Histogramm der Sentiment-Scores**
+### 6️⃣ **Sentimentanalyse**
+- VADER SentimentIntensityAnalyzer
+- Score zwischen -1 (negativ) und +1 (positiv)
+- Ergebnisse in `sentiment_analyse.txt`
 
----
-
-## 🛠 **Installation & Nutzung**
-
-### 1️⃣ **Vorbereitungen**
-Stelle sicher, dass du **Python 3.8+** installiert hast.  
-
-### 2️⃣ **Benötigte Bibliotheken installieren**
-Falls nicht vorhanden, installiert das Skript automatisch alle notwendigen Pakete.  
-Falls du das manuell tun möchtest, führe folgenden Befehl aus:
-
-```bash
-pip install pandas numpy nltk gensim matplotlib seaborn wordcloud rapidfuzz scikit-learn
-3️⃣ Skript ausführen
-Kopiere die Datei Reviews.csv in den Ordner "NLP Analyse" in deinem Download-Verzeichnis.
-Dann starte das Skript mit:
-
-bash
-Kopieren
-Bearbeiten
-python nlp_analysis.py
-Nach Abschluss findest du folgende Ergebnisse als Dateien:
-
-bereinigte_reviews.txt → Vorbereitete Texte
-vektorisierung.txt → Shape der Vektormatrizen
-lda_themen.txt → Identifizierte LDA-Themen
-nmf_themen.txt → Identifizierte NMF-Themen
-coherence_score.txt → Qualitätsbewertung der Themen
-lda_visualisierung.png → Diagramm zur Themenverteilung
-sentiment_analyse.txt → Bewertung der Sentiments
-sentiment_verteilung.png → Verteilung positiver/negativer Rezensionen
-📊 Beispielausgabe
-🔹 Extrahierte Themen (LDA)
-pgsql
-Kopieren
-Bearbeiten
-🔹 Thema 1 (Product Quality): durable | well-made | reliable | sturdy | broken | defective
-🔹 Thema 2 (Customer Service): support | warranty | helpful | refund | return | replacement
-🔹 Thema 3 (Shipping & Packaging): delivery | shipping | box | arrived | damaged | fast
-🔹 Thema 4 (Price & Value): cheap | expensive | worth | value | overpriced | discount
-🔹 Thema 5 (User Experience): easy | setup | instructions | user-friendly | comfortable
-📊 Themenvisualisierung (LDA)
-
-
-📈 Sentiment-Analyse
-makefile
-Kopieren
-Bearbeiten
-Positiv: 78%
-Neutral: 12%
-Negativ: 10%
-
-
-📝 Lizenz
-Dieses Projekt steht unter der MIT-Lizenz, d.h. du kannst den Code frei nutzen, verändern und weiterverbreiten.
-
-
-🚀 Erstellt von: Sarah Mannes
-📅 Letzte Aktualisierung: März 2025
-
-yaml
-Kopieren
-Bearbeiten
+### 7️⃣ **Visualisierung**
+- **Themenverteilung (LDA)**: `lda_visualisierung.png`
+- **Sentimentverteilung**: `sentiment_verteilung.png`
 
 ---
 
+## 📂 Erzeugte Dateien
+
+| Datei                         | Beschreibung                                         |
+|------------------------------|------------------------------------------------------|
+| `bereinigte_beschwerden.txt` | Vorverarbeitete Rezensionstexte                      |
+| `vektorisierung.txt`         | Matrixgrößen von BoW und TF-IDF                      |
+| `lda_themen.txt`             | Extrahierte Themen mit LDA + automatische Benennung  |
+| `nmf_themen.txt`             | Extrahierte Themen mit NMF + automatische Benennung  |
+| `coherence_score.txt`        | Coherence Score zur Modellvalidierung                |
+| `sentiment_analyse.txt`      | Sentiment-Score für jeden Text                       |
+| `lda_visualisierung.png`     | Visualisierung der Wortverteilung pro LDA-Thema      |
+| `sentiment_verteilung.png`   | Histogramm der Sentimentverteilung                   |
+
+---
+
+## 🛠️ Verwendete Technologien
+
+- **Python** (3.12+)
+- **Pandas, NumPy**
+- **NLTK**
+- **Scikit-Learn**
+- **Gensim**
+- **Matplotlib & Seaborn**
+- **WordCloud**
+- **RapidFuzz** (für fuzzy topic matching)
+
+---
+
+## 🧪 Beispiel für extrahierte Themen
+
+```text
+🔹 Thema 1 (Pet Products): food | dog | treat | cat | love | eat | day | snack | chewy | animal
+🔹 Thema 2 (Taste & Quality): taste | like | flavor | chocolate | sweet | sugar | good | great | snack | product
+🔹 Thema 3 (Packaging & Delivery): package | bag | box | time | order | delivery | arrived | seal | shipping | bottle
+🔹 Thema 4 (Price & Value): price | cost | worth | cheap | affordable | deal | value | buy | expensive | low
+🔹 Thema 5 (Nutrition & Ingredients): sugar | protein | fat | calorie | healthy | ingredient | salt | organic | natural | gluten
+📜 Lizenz
+Dieses Projekt verwendet die MIT-Lizenz. Du darfst den Code frei verwenden, verändern und teilen, solange der ursprüngliche Urheber genannt wird.
+
+🙋‍♀️ Autorin
+Sarah Mannes
+Portfolio – Natural Language Processing
+Stand: März 2025
 
 
 
