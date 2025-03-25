@@ -53,8 +53,8 @@ stop_words.update(custom_stopwords)
 def preprocess_text(text):
     text = text.lower()
     text = re.sub(r'\d+', '', text)
-    text = re.sub(r'<br\s*/?>', ' ', text)   # HTML Breaks
-    text = re.sub(r'\bbr\b', '', text)       # isolate "br"
+    text = re.sub(r'<br\s*/?>', ' ', text)
+    text = re.sub(r'\bbr\b', '', text)
     text = re.sub(r'[^\w\s]', '', text)
     tokens = word_tokenize(text)
     tokens = [lemmatizer.lemmatize(word) for word in tokens if word not in stop_words]
@@ -87,13 +87,12 @@ nmf_model.fit(tfidf_matrix)
 
 # 📝 Themenbenennung
 print("📝 Bestimme Themennamen...")
-
 predefined_topics = {
-    "Pet Products": {"dog", "cat", "treat", "chew", "puppy", "pet", "kibble", "animal"},
-    "Taste & Quality": {"taste", "flavor", "sweet", "bitter", "texture", "rich", "smooth", "blend", "chocolate"},
-    "Packaging & Delivery": {"package", "shipping", "box", "bag", "sealed", "arrived", "delivered", "ordered"},
+    "Pet Products": {"dog", "cat", "pet", "animal", "treat", "puppy", "kibble"},
+    "Taste & Quality": {"taste", "flavor", "sweet", "texture", "chocolate", "rich", "smooth"},
+    "Packaging & Delivery": {"package", "shipping", "box", "bag", "arrived", "delivered", "ordered"},
     "Price & Value": {"price", "expensive", "cheap", "affordable", "deal", "worth", "cost", "value"},
-    "Nutrition & Ingredients": {"ingredient", "sugar", "protein", "calorie", "organic", "natural", "fat", "salt", "healthy"}
+    "Nutrition & Ingredients": {"ingredient", "sugar", "protein", "calorie", "organic", "natural", "salt", "healthy"}
 }
 
 def name_topic(topic_words):
@@ -132,6 +131,25 @@ coherence_score = f"Coherence Score für LDA: {coherence_model_lda.get_coherence
 with open("coherence_score.txt", "w", encoding="utf-8") as file:
     file.write(coherence_score)
 print("✅ Datei 'coherence_score.txt' wurde erfolgreich gespeichert!")
+
+# 📊 Coherence Score auch für NMF berechnen
+print("📊 Berechne Coherence Score für NMF...")
+
+nmf_topics = []
+feature_names_tfidf = vectorizer_tfidf.get_feature_names_out()
+for topic in nmf_model.components_:
+    top_words = [feature_names_tfidf[i] for i in topic.argsort()[:-10 - 1:-1]]
+    nmf_topics.append(top_words)
+
+coherence_model_nmf = CoherenceModel(topics=nmf_topics, texts=texts, dictionary=dictionary, coherence='c_v')
+coherence_score_nmf = f"Coherence Score für NMF: {coherence_model_nmf.get_coherence():.4f}\n"
+
+# Beide Scores abspeichern
+with open("coherence_score.txt", "w", encoding="utf-8") as file:
+    file.write(coherence_score)
+    file.write(coherence_score_nmf)
+
+print("✅ Datei 'coherence_score.txt' wurde erfolgreich aktualisiert!")
 
 # 📊 LDA Visualisierung
 print("📊 Erstelle LDA-Visualisierung...")
