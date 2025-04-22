@@ -1,86 +1,102 @@
 # NLP-Projekt zur Themen- und Sentimentanalyse von Produktrezensionen
 
-Dieses Projekt analysiert unstrukturierte Produktbewertungen (aus dem Lebensmittelbereich) mithilfe moderner NLP-Methoden. Ziel ist es, häufige Themen automatisch zu extrahieren, die Qualität der Themenmodellierung zu bewerten und die Stimmung der Rezensionen zu klassifizieren.
+import pandas as pd
+import numpy as np
+import re
+import nltk
+import gensim
+import matplotlib.pyplot as plt
+import seaborn as sns
+import os
 
----
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+from sklearn.decomposition import LatentDirichletAllocation, NMF
+from gensim.models import CoherenceModel
+from gensim.corpora import Dictionary
 
-## 📌 Zielsetzung
+# Falls notwendig, NLTK-Resourcen herunterladen
+nltk.download('stopwords')
+nltk.download('punkt')
+nltk.download('wordnet')
 
-Ziel ist es, aus einer großen Menge unstrukturierter Texte (Produktrezensionen von Amazon) **automatisch Themen** zu identifizieren und **Stimmungen zu analysieren**, um daraus **relevante Erkenntnisse** für Unternehmen oder Entscheidungsträger zu gewinnen.
+### 1️⃣ DATENLADEN ###
+df = pd.read_csv("/Users/sarahmannes/Downloads/NLP Analyse/311_Service_Requests.csv", usecols=["Complaint Type", "Descriptor", "Location Type", "Incident Zip", "City", "Borough", "Resolution Description"])
+df = df.dropna(subset=["Complaint Type", "Resolution Description"])  # Entferne fehlende Werte
 
----
+### 2️⃣ TEXTVORBEREITUNG ###
+lemmatizer = WordNetLemmatizer()
+stop_words = set(stopwords.words('english'))
 
-## 🔍 Analyse-Workflow
+def preprocess_text(text):
+    text = text.lower()
+    text = re.sub(r'\d+', '', text)
+    text = re.sub(r'[^\w\s]', '', text)
+    tokens = word_tokenize(text)
+    tokens = [lemmatizer.lemmatize(word) for word in tokens if word not in stop_words]
+    return " ".join(tokens)
 
-### 1️⃣ **Datenquelle**
-- **Datei**: [`Reviews.csv`](https://www.kaggle.com/datasets/snap/amazon-fine-food-reviews)
-- **Inhalt**: Kundenrezensionen inkl. Text, Bewertung, Produktinformationen
-- **Importpfad**: `/Users/sarahmannes/Downloads/NLP Analyse/Reviews.csv`
+df["clean_text"] = df["Resolution Description"].astype(str).apply(preprocess_text)
 
-### 2️⃣ **Vorverarbeitung**
-- Entfernen von Sonderzeichen, Zahlen, HTML-Tags (`<br>`), häufige Stoppwörter und irrelevante Begriffe
-- Tokenisierung & Lemmatisierung
-- Speicherung als `bereinigte_beschwerden.txt`
+df["clean_text"].to_csv("bereinigte_beschwerden.txt", index=False, header=False)
+print("✅ Datei 'bereinigte_beschwerden.txt' wurde erfolgreich gespeichert!")
 
-### 3️⃣ **Vektorisierung**
-- Bag-of-Words (BoW)
-- TF-IDF
-- Ausgabe der Dimensionen in `vektorisierung.txt`
+### 3️⃣ TEXTE IN NUMERISCHE VEKTOREN UMWANDELN ###
+vectorizer_bow = CountVectorizer(max_features=1000)
+bow_matrix = vectorizer_bow.fit_transform(df["clean_text"])
 
-### 4️⃣ **Themenmodellierung**
-- **LDA** (Latent Dirichlet Allocation) auf BoW
-- **NMF** (Non-negative Matrix Factorization) auf TF-IDF
-- Automatische **Themenbenennung** per Fuzzy Matching
-- Speicherung in `lda_themen.txt` & `nmf_themen.txt`
+vectorizer_tfidf = TfidfVectorizer(max_features=1000)
+tfidf_matrix = vectorizer_tfidf.fit_transform(df["clean_text"])
 
-### 5️⃣ **Coherence Score**
-- Berechnung mit `gensim`
-- Ausgabe in `coherence_score.txt` zur Bewertung der Modellqualität
+print("BoW Shape:", bow_matrix.shape)
+print("TF-IDF Shape:", tfidf_matrix.shape)
 
-### 6️⃣ **Sentimentanalyse**
-- VADER SentimentIntensityAnalyzer
-- Score zwischen -1 (negativ) und +1 (positiv)
-- Ergebnisse in `sentiment_analyse.txt`
+with open("vektorisierung.txt", "w", encoding="utf-8") as file:
+    file.write(f"BoW Shape: {bow_matrix.shape}\n")
+    file.write(f"TF-IDF Shape: {tfidf_matrix.shape}\n")
+print("✅ Datei 'vektorisierung.txt' wurde erfolgreich gespeichert!")
 
-### 7️⃣ **Visualisierung**
-- **Themenverteilung (LDA)**: `lda_visualisierung.png`
-- **Sentimentverteilung**: `sentiment_verteilung.png`
+### 4️⃣ THEMENEXTRAKTION (LDA & NMF) ###
+def save_topics_to_file(model, feature_names, filename, n_words=10):
+    with open(filename, "w", encoding="utf-8") as file:
+        for topic_idx, topic in enumerate(model.components_):
+            topic_words = " | ".join([feature_names[i] for i in topic.argsort()[:-n_words - 1:-1]])
+            file.write(f"🔹 Thema {topic_idx+1}: {topic_words}\n")
+    print(f"✅ Datei '{filename}' wurde erfolgreich gespeichert!")
 
----
+lda_model = LatentDirichletAllocation(n_components=5, random_state=42)
+lda_model.fit(bow_matrix)
+print("\n📌 LDA Themen:")
+save_topics_to_file(lda_model, vectorizer_bow.get_feature_names_out(), "lda_themen.txt")
 
-## 📂 Erzeugte Dateien
+nmf_model = NMF(n_components=5, random_state=42)
+nmf_model.fit(tfidf_matrix)
+print("\n📌 NMF Themen:")
+save_topics_to_file(nmf_model, vectorizer_tfidf.get_feature_names_out(), "nmf_themen.txt")
 
-| Datei                         | Beschreibung                                         |
-|------------------------------|------------------------------------------------------|
-| `bereinigte_reviews.txt` | Vorverarbeitete Rezensionstexte                      |
-| `vektorisierung.txt`         | Matrixgrößen von BoW und TF-IDF                      |
-| `lda_themen.txt`             | Extrahierte Themen mit LDA + automatische Benennung  |
-| `nmf_themen.txt`             | Extrahierte Themen mit NMF + automatische Benennung  |
-| `coherence_score.txt`        | Coherence Score zur Modellvalidierung                |
-| `sentiment_analyse.txt`      | Sentiment-Score für jeden Text                       |
-| `lda_visualisierung.png`     | Visualisierung der Wortverteilung pro LDA-Thema      |
-| `sentiment_verteilung.png`   | Histogramm der Sentimentverteilung                   |
+### 5️⃣ COHERENCE SCORE BERECHNEN ###
+texts = [text.split() for text in df["clean_text"]]
+dictionary = Dictionary(texts)
+corpus = [dictionary.doc2bow(text) for text in texts]
+lda_gensim = gensim.models.LdaModel(corpus=corpus, id2word=dictionary, num_topics=5, passes=10)
+coherence_model_lda = CoherenceModel(model=lda_gensim, texts=texts, dictionary=dictionary, coherence='c_v')
 
----
+coherence_score = f"🔎 Coherence Score für LDA: {coherence_model_lda.get_coherence():.4f}\n"
+print(coherence_score)
 
-## 🛠️ Verwendete Technologien
+with open("coherence_score.txt", "w", encoding="utf-8") as file:
+    file.write(coherence_score)
+print("✅ Datei 'coherence_score.txt' wurde erfolgreich gespeichert!")
 
-- **Python** (3.12+)
-- **Pandas, NumPy**
-- **NLTK**
-- **Scikit-Learn**
-- **Gensim**
-- **Matplotlib & Seaborn**
-- **WordCloud**
-- **RapidFuzz** (für fuzzy topic matching)
+### 6️⃣ VISUALISIERUNG DER THEMEN ###
+plt.figure(figsize=(10, 5))
+sns.barplot(x=[f'Thema {i+1}' for i in range(5)], y=lda_model.components_.sum(axis=1))
+plt.title("Anzahl der Wörter pro Thema (LDA)")
+plt.xlabel("Thema")
+plt.ylabel("Wort-Häufigkeit")
+plt.savefig("lda_visualisierung.png")
+plt.show()
+print("✅ Datei 'lda_visualisierung.png' wurde erfolgreich gespeichert!")
 
----
-
-## 🧪 Beispiel für extrahierte Themen
-
-```text
-🔹 Thema 1 (Pet Products): food | dog | treat | cat | love | eat | day | snack | chewy | animal
-🔹 Thema 2 (Taste & Quality): taste | like | flavor | chocolate | sweet | sugar | good | great | snack | product
-🔹 Thema 3 (Packaging & Delivery): package | bag | box | time | order | delivery | arrived | seal | shipping | bottle
-🔹 Thema 4 (Price & Value): price | cost | worth | cheap | affordable | deal | value | buy | expensive | low
-🔹 Thema 5 (Nutrition & Ingredients): sugar | protein | fat | calorie | healthy | ingredient | salt | organic | natural | gluten
