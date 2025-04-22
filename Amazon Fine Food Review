@@ -112,7 +112,7 @@ def save_named_topics(model, feature_names, filename, n_words=10):
         for topic_idx, topic in enumerate(model.components_):
             topic_words = [feature_names[i] for i in topic.argsort()[:-n_words - 1:-1]]
             topic_name = name_topic(topic_words)
-            file.write(f"🔹 Thema {topic_idx+1} ({topic_name}): {' | '.join(topic_words)}\n")
+            file.write(f"\U0001F539 Thema {topic_idx+1} ({topic_name}): {' | '.join(topic_words)}\n")
     print(f"✅ Datei '{filename}' wurde erfolgreich gespeichert!")
 
 save_named_topics(lda_model, vectorizer_bow.get_feature_names_out(), "lda_themen.txt")
@@ -128,13 +128,6 @@ lda_gensim = gensim.models.LdaModel(corpus=corpus, id2word=dictionary, num_topic
 coherence_model_lda = CoherenceModel(model=lda_gensim, texts=texts, dictionary=dictionary, coherence='c_v')
 coherence_score = f"Coherence Score für LDA: {coherence_model_lda.get_coherence():.4f}\n"
 
-with open("coherence_score.txt", "w", encoding="utf-8") as file:
-    file.write(coherence_score)
-print("✅ Datei 'coherence_score.txt' wurde erfolgreich gespeichert!")
-
-# 📊 Coherence Score auch für NMF berechnen
-print("📊 Berechne Coherence Score für NMF...")
-
 nmf_topics = []
 feature_names_tfidf = vectorizer_tfidf.get_feature_names_out()
 for topic in nmf_model.components_:
@@ -144,11 +137,9 @@ for topic in nmf_model.components_:
 coherence_model_nmf = CoherenceModel(topics=nmf_topics, texts=texts, dictionary=dictionary, coherence='c_v')
 coherence_score_nmf = f"Coherence Score für NMF: {coherence_model_nmf.get_coherence():.4f}\n"
 
-# Beide Scores abspeichern
 with open("coherence_score.txt", "w", encoding="utf-8") as file:
     file.write(coherence_score)
     file.write(coherence_score_nmf)
-
 print("✅ Datei 'coherence_score.txt' wurde erfolgreich aktualisiert!")
 
 # 📊 LDA Visualisierung
@@ -169,6 +160,20 @@ plt.savefig("lda_visualisierung.png")
 plt.show()
 print("✅ Datei 'lda_visualisierung.png' wurde erfolgreich gespeichert!")
 
+# 📊 Wordcloud pro Thema
+print("📊 Erstelle Wordclouds für LDA-Themen...")
+for idx, topic in enumerate(lda_model.components_):
+    top_words = {vectorizer_bow.get_feature_names_out()[i]: topic[i] for i in topic.argsort()[:-30-1:-1]}
+    wordcloud = WordCloud(width=800, height=400, background_color='white').generate_from_frequencies(top_words)
+    plt.figure(figsize=(8,4))
+    plt.imshow(wordcloud, interpolation="bilinear")
+    plt.axis('off')
+    plt.title(f"Thema {idx+1}")
+    plt.tight_layout()
+    plt.savefig(f"wordcloud_thema_{idx+1}.png")
+    plt.close()
+print("✅ Wordclouds gespeichert!")
+
 # 📊 Sentiment-Analyse
 print("📊 Erstelle Sentiment-Verteilung...")
 sia = SentimentIntensityAnalyzer()
@@ -184,5 +189,23 @@ plt.ylabel("Anzahl Texte")
 plt.savefig("sentiment_verteilung.png")
 plt.show()
 print("✅ Datei 'sentiment_verteilung.png' wurde erfolgreich gespeichert!")
+
+# 📊 Ergebnisübersicht
+print("📊 Erstelle zusammenfassende Ergebnisdatei...")
+num_texts = len(df)
+num_positive = (df["sentiment"] > 0.05).sum()
+num_negative = (df["sentiment"] < -0.05).sum()
+num_neutral = num_texts - num_positive - num_negative
+
+with open("ergebnisse_uebersicht.txt", "w", encoding="utf-8") as file:
+    file.write(f"Anzahl Texte: {num_texts}\n")
+    file.write(f"BoW Shape: {bow_matrix.shape}\n")
+    file.write(f"TF-IDF Shape: {tfidf_matrix.shape}\n")
+    file.write(coherence_score)
+    file.write(coherence_score_nmf)
+    file.write(f"Positive Texte: {num_positive}\n")
+    file.write(f"Negative Texte: {num_negative}\n")
+    file.write(f"Neutrale Texte: {num_neutral}\n")
+print("✅ Datei 'ergebnisse_uebersicht.txt' wurde erfolgreich gespeichert!")
 
 print("🚀 Analyse abgeschlossen!")
