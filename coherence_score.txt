@@ -1,0 +1,2 @@
+Coherence Score für LDA: 0.4926
+Coherence Score für NMF: 0.6275

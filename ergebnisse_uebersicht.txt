@@ -1,0 +1,8 @@
+Anzahl Texte: 568454
+BoW Shape: (568454, 1000)
+TF-IDF Shape: (568454, 1000)
+Coherence Score für LDA: 0.4926
+Coherence Score für NMF: 0.6275
+Positive Texte: 492253
+Negative Texte: 56927
+Neutrale Texte: 19274
